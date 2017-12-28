@@ -1,171 +1,177 @@
 # **Traffic Sign Recognition** 
 
-## Writeup
-
-### You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
-
----
-
-**Build a Traffic Sign Recognition Project**
-
-The goals / steps of this project are the following:
-* Load the data set (see below for links to the project data set)
-* Explore, summarize and visualize the data set
-* Design, train and test a model architecture
-* Use the model to make predictions on new images
-* Analyze the softmax probabilities of the new images
-* Summarize the results with a written report
-
-
 [//]: # (Image References)
-
-[image1]: ./examples/visualization.jpg "Visualization"
-[image2]: ./examples/grayscale.jpg "Grayscaling"
-[image3]: ./examples/random_noise.jpg "Random Noise"
-[image4]: ./examples/placeholder.png "Traffic Sign 1"
-[image5]: ./examples/placeholder.png "Traffic Sign 2"
-[image6]: ./examples/placeholder.png "Traffic Sign 3"
-[image7]: ./examples/placeholder.png "Traffic Sign 4"
-[image8]: ./examples/placeholder.png "Traffic Sign 5"
-
-## Rubric Points
-### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/481/view) individually and describe how I addressed each point in my implementation.  
-
----
-### Writeup / README
-
-#### 1. Provide a Writeup / README that includes all the rubric points and how you addressed each one. You can submit your writeup as markdown or pdf. You can use this template as a guide for writing the report. The submission includes the project code.
-
-You're reading it! and here is a link to my [project code](https://github.com/udacity/CarND-Traffic-Sign-Classifier-Project/blob/master/Traffic_Sign_Classifier.ipynb)
+[traininghs]: ./snapshots/traininghs.png "traininghs"
+[preprocessedhs]: ./snapshots/preprocessedhs.png "preprocessedhs"
+[addingbrightness]: ./snapshots/brightness.png "preprocessedhs"
+[mysampleimages]: ./snapshots/mysamples.png "mysamples"
 
 ### Data Set Summary & Exploration
 
-#### 1. Provide a basic summary of the data set. In the code, the analysis should be done using python, numpy and/or pandas methods rather than hardcoding results manually.
+#### 1. Basic summary of the data set.
 
-I used the pandas library to calculate summary statistics of the traffic
-signs data set:
+I used basic python and numpy apis to get stats.
 
-* The size of training set is ?
-* The size of the validation set is ?
-* The size of test set is ?
-* The shape of a traffic sign image is ?
-* The number of unique classes/labels in the data set is ?
+* The size of training set is 34799
+* The size of the validation set is 4410
+* The size of test set is 12630
+* The shape of a traffic sign image is (32, 32, 3)
+* The number of unique classes/labels in the data set is 43
 
-#### 2. Include an exploratory visualization of the dataset.
+#### 2. Exploratory visualization of the dataset.
 
-Here is an exploratory visualization of the data set. It is a bar chart showing how the data ...
+* One of the visualization I did was simply print out images and their labels.
+* Second is to check the distribution of various traffic signs in the training images.
 
-![alt text][image1]
-
-### Design and Test a Model Architecture
-
-#### 1. Describe how you preprocessed the image data. What techniques were chosen and why did you choose these techniques? Consider including images showing the output of each preprocessing technique. Pre-processing refers to techniques such as converting to grayscale, normalization, etc. (OPTIONAL: As described in the "Stand Out Suggestions" part of the rubric, if you generated additional data for training, describe why you decided to generate additional data, how you generated the data, and provide example images of the additional data. Then describe the characteristics of the augmented training set like number of images in the set, number of images for each class, etc.)
-
-As a first step, I decided to convert the images to grayscale because ...
-
-Here is an example of a traffic sign image before and after grayscaling.
-
-![alt text][image2]
-
-As a last step, I normalized the image data because ...
-
-I decided to generate additional data because ... 
-
-To add more data to the the data set, I used the following techniques because ... 
-
-Here is an example of an original image and an augmented image:
-
-![alt text][image3]
-
-The difference between the original data set and the augmented data set is the following ... 
+![Training Histogram][traininghs]
 
 
-#### 2. Describe what your final model architecture looks like including model type, layers, layer sizes, connectivity, etc.) Consider including a diagram and/or table describing the final model.
+### 3. Design and Test a Model Architecture
 
-My final model consisted of the following layers:
+As first step I converted the images to gray scale. I noticed converting to gray scale will make
+training faster and also it is how Lenet lab did. So wanted to keep it close to that architecture.
 
-| Layer         		|     Description	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| Input         		| 32x32x3 RGB image   							| 
-| Convolution 3x3     	| 1x1 stride, same padding, outputs 32x32x64 	|
-| RELU					|												|
-| Max pooling	      	| 2x2 stride,  outputs 16x16x64 				|
-| Convolution 3x3	    | etc.      									|
-| Fully connected		| etc.        									|
-| Softmax				| etc.        									|
-|						|												|
-|						|												|
- 
+Next I normalized the image. On researching on web I learnt that normalizing the image keeps distribution of data
+narrow, making it easier to train.
 
+Next, I added fake data. I did this because initially I ran the basic Lenet architecture on training samples without any fake data. 
+Here I noticed that accuracy was not great especially for label #1 etc which have fewer samples in training. 
+For adding fake labels I used following approach.
+* Figure out 60th percentile of distribution of the labels.
+* Categorize labels as sparse (<60%) and dense (>60%).
+* For sparse labels, I generated enough fake data to make sure we have atleast 750 images (60%). 
+* Fake data was generated by taking random images for a given label and randomly adding brightness or removing brighness.
+* For dense labels I added about 50-100 random images
+* I read about other techniques to create fake images (like pixel transformation etc). But they sounded little too complex 
+for me. So I went with brightness approach and relied on model architecture to further increase accuracy.
 
-#### 3. Describe how you trained your model. The discussion can include the type of optimizer, the batch size, number of epochs and any hyperparameters such as learning rate.
+Here is a sample after adding brightness (top image is fake image).
 
-To train the model, I used an ....
-
-#### 4. Describe the approach taken for finding a solution and getting the validation set accuracy to be at least 0.93. Include in the discussion the results on the training, validation and test sets and where in the code these were calculated. Your approach may have been an iterative process, in which case, outline the steps you took to get to the final solution and why you chose those steps. Perhaps your solution involved an already well known implementation or architecture. In this case, discuss why you think the architecture is suitable for the current problem.
-
-My final model results were:
-* training set accuracy of ?
-* validation set accuracy of ? 
-* test set accuracy of ?
-
-If an iterative approach was chosen:
-* What was the first architecture that was tried and why was it chosen?
-* What were some problems with the initial architecture?
-* How was the architecture adjusted and why was it adjusted? Typical adjustments could include choosing a different model architecture, adding or taking away layers (pooling, dropout, convolution, etc), using an activation function or changing the activation function. One common justification for adjusting an architecture would be due to overfitting or underfitting. A high accuracy on the training set but low accuracy on the validation set indicates over fitting; a low accuracy on both sets indicates under fitting.
-* Which parameters were tuned? How were they adjusted and why?
-* What are some of the important design choices and why were they chosen? For example, why might a convolution layer work well with this problem? How might a dropout layer help with creating a successful model?
-
-If a well known architecture was chosen:
-* What architecture was chosen?
-* Why did you believe it would be relevant to the traffic sign application?
-* How does the final model's accuracy on the training, validation and test set provide evidence that the model is working well?
- 
-
-### Test a Model on New Images
-
-#### 1. Choose five German traffic signs found on the web and provide them in the report. For each image, discuss what quality or qualities might be difficult to classify.
-
-Here are five German traffic signs that I found on the web:
-
-![alt text][image4] ![alt text][image5] ![alt text][image6] 
-![alt text][image7] ![alt text][image8]
-
-The first image might be difficult to classify because ...
-
-#### 2. Discuss the model's predictions on these new traffic signs and compare the results to predicting on the test set. At a minimum, discuss what the predictions were, the accuracy on these new predictions, and compare the accuracy to the accuracy on the test set (OPTIONAL: Discuss the results in more detail as described in the "Stand Out Suggestions" part of the rubric).
-
-Here are the results of the prediction:
-
-| Image			        |     Prediction	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| Stop Sign      		| Stop sign   									| 
-| U-turn     			| U-turn 										|
-| Yield					| Yield											|
-| 100 km/h	      		| Bumpy Road					 				|
-| Slippery Road			| Slippery Road      							|
+![After adding Brightness][addingbrightness]
 
 
-The model was able to correctly guess 4 of the 5 traffic signs, which gives an accuracy of 80%. This compares favorably to the accuracy on the test set of ...
+At end of of this preprocessing I got a better looking distribution.
 
-#### 3. Describe how certain the model is when predicting on each of the five new images by looking at the softmax probabilities for each prediction. Provide the top 5 softmax probabilities for each image along with the sign type of each probability. (OPTIONAL: as described in the "Stand Out Suggestions" part of the rubric, visualizations can also be provided such as bar charts)
-
-The code for making predictions on my final model is located in the 11th cell of the Ipython notebook.
-
-For the first image, the model is relatively sure that this is a stop sign (probability of 0.6), and the image does contain a stop sign. The top five soft max probabilities were
-
-| Probability         	|     Prediction	        					| 
-|:---------------------:|:---------------------------------------------:| 
-| .60         			| Stop sign   									| 
-| .20     				| U-turn 										|
-| .05					| Yield											|
-| .04	      			| Bumpy Road					 				|
-| .01				    | Slippery Road      							|
+![Training Histogram After Preprocessing][preprocessedhs]
 
 
-For the second image ... 
+Using Lenet architecture as is with this preprocessing got me close 91.5% accuracy. When randomly exploring
+samples where there is error, I noticed that images which looked similar - like `bicycle crossing` vs `right of way` tend to have more error.
+Reason seems to be, for most part the shape of these images is same (triangle with red borders and a marking inside etc). I need to change the architecture to better
+capture the finer details of images. 
 
-### (Optional) Visualizing the Neural Network (See Step 4 of the Ipython notebook for more details)
-#### 1. Discuss the visual output of your trained network's feature maps. What characteristics did the neural network use to make classifications?
+Original Lenet article shared has 2 Convolution + pooling layers and 3 Fully connected layers. I figured I need much more 
+detail in shapes, so from lectures convolution is the way to go. So I changed Lenet architecture
+to have 3 Conv + pooling layers and 2 fully connected layers. This got my accuracy up definitely. But to get to > 94, I needed
+to tweak it by increasing channels in each layer.
+
+My Final Architecture looked like this.
+
+* Layer 1: Convolutional. `32x32x1 => 28x28x32` followed by RELU activation
+* Max Pooling. `28x28x32 => 14x14x32`
+* Layer 2: Convolutional. `14x14x32 => 10x10x64` followed by RELU
+* Max Pooling. `10x10x64 => 5x5x64`
+* Layer 3: Convolutional. `5x5x64 => 3x3x128` followed by RELU activation
+* Max Pooling. `3x3x128 => 2x2x128`
+* Flatten. `2x2x128 => 512`
+* Add dropout to avoid overfitting
+* Fully Connected. `512 => 84`
+* Fully Connected. `84 => n_classes`
 
 
+With this I was able to achieve following accuracy
+
+* **Validation Accuracy: 0.954 (95.4%)**
+* **Test Accuracy: 0.930 (93.0%)**
+
+#### 4. Model's predictions on these new traffic signs
+
+As suggested in the project requirements, I downloaded about 8 german traffic images from web.
+
+![My Random Samples][mysampleimages]
+
+Reasons for selecting images:
+
+As noted in design section, there are certain signs that look similar in test images. Ex `Slippery road`, `Bicycles crossing`.
+Interesting thing about this three images is shape is similar. But inside figure makes difference. When image is blurred, classifier tend to get confused.
+Similarly, So one of the image in my samples is a blurred out version of `Bicycles crossing`. 
+
+Another aspect I wanted to cover in sample images is, in general road signs are not clean. Sometimes there are
+
+Another aspect is, `Turn left ahead` has very close similarity to `Go straight or left` in some test images. So I also had a sample of that.
+
+Here is the result of running the classifier on these images. Most of the predictions are accurate. 
+Notice that just as is case with test images, classifier got confused with label `29` vs `23` (`Bicycles crossing` vs `Slippery road`). This is because of blurred image i provided.
+```
+Predicted Labels: [34, 33, 14, 23, 13, 17, 11, 11]
+Expected Labels: [34, 33, 14, 29, 17, 13, 11]
+```
+
+#### 5. Softmax Probabilities
+
+Tredictions for each of the image are pasted below. As you can see, the top probability for my sample images always seemed to be correct image.
+
+There is something interesting in probabilities below. For example, take the first image (which is *Turn left ahead*).
+
+Top two predicted labels are `34` and `37`, which are **Turn left ahead** and **Go straight or left**. This is accurate,
+because those two images are very similar looking. 
+
+And also as explained earlier, see results of image #3. Top three labels are 
+
+ * 23: Slippery road
+ * 30: Bicycles crossing
+ * 29: Beware of ice/snow
+
+As mentioned previously, this because when blurred out these three signs are very similar. Since image I provided is blurred out, this makes sense.
+This is very similar to what happens with test images too.
+
+
+```
+
+0. Probabilities [  9.82371747e-01   1.19156288e-02   2.53225444e-03   1.81850430e-03
+   5.55440318e-04]
+0.Guessed Labels: [34 21 11 30 38], Expected Label 34
+
+============================================================================
+
+1. Probabilities [  1.00000000e+00   9.80774156e-16   6.21845691e-16   3.19357176e-16
+   5.85865690e-17]
+1.Guessed Labels: [33 25 11 35 10], Expected Label 33
+
+============================================================================
+
+2. Probabilities [  1.00000000e+00   3.20514795e-12   4.65871319e-13   4.12102725e-13
+   1.64772316e-13]
+2.Guessed Labels: [14 17 34 38 12], Expected Label 14
+
+============================================================================
+
+3. Probabilities [  9.99999046e-01   9.61963792e-07   1.27202098e-08   7.58059038e-09
+   5.12431653e-09]
+3.Guessed Labels: [23 30 29 19 24], Expected Label 29
+
+============================================================================
+
+4. Probabilities [  9.99999881e-01   1.48105642e-07   1.47790642e-08   6.13253837e-10
+   1.52765613e-11]
+4.Guessed Labels: [13 10 14 15 35], Expected Label 13
+
+============================================================================
+
+5. Probabilities [  1.00000000e+00   3.48571868e-19   1.59014530e-22   5.92466686e-24
+   8.71719206e-25]
+5.Guessed Labels: [17  7 12 16  9], Expected Label 17
+
+============================================================================
+
+6. Probabilities [ 0.85222316  0.05053447  0.04386973  0.02332762  0.01181182]
+6.Guessed Labels: [11 12 30 26 40], Expected Label 11
+
+============================================================================
+
+7. Probabilities [  1.00000000e+00   8.27354074e-10   1.23641292e-17   4.29326408e-21
+   2.31824182e-22]
+7.Guessed Labels: [11 30 12 26 40], Expected Label 11
+
+
+```
